@@ -8,10 +8,11 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AppConfigModule } from './common/config/config.module';
 import { AppLoggingInterceptor } from './common/interceptors/app-logger.interceptor';
 import { AppLogger } from './common/logger/app-logger';
+import { AgentflowModule } from './modules/agentflow/agentflow.module';
 import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
-  imports: [AuthModule, AppConfigModule],
+  imports: [AppConfigModule, AuthModule, AgentflowModule],
   providers: [
     AppLogger,
     {

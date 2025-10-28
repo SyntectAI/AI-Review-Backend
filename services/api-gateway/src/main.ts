@@ -15,6 +15,7 @@ import { CustomValidationPipe } from './common/pipes/custom-validation.pipe';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
+    rawBody: true,
   });
   app.useLogger(app.get(AppLogger));
   const configService = app.get(ConfigService);
