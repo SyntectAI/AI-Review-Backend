@@ -4,9 +4,9 @@
 */
 import { Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
+import { CodeReviewRequest, CodeReviewResponse } from 'src/common/mastra/schemas';
 
 import { mastra } from '../../common/mastra';
-import { CodeReviewRequest, CodeReviewResponse } from '../../common/types/workflow';
 
 @Injectable()
 export class AgentFlowService {

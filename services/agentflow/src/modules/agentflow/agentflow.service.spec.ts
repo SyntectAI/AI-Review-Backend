@@ -4,9 +4,9 @@
 */
 import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { CodeReviewRequest } from 'src/common/mastra/schemas';
 
 import { mastra } from '../../common/mastra';
-import { CodeReviewRequest } from '../../common/types/workflow';
 import { AgentFlowService } from './agentflow.service';
 
 jest.mock('../../common/mastra', () => ({

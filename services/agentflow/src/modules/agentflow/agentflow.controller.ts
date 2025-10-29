@@ -4,7 +4,8 @@
 */
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
-import { CodeReviewRequest, type CodeReviewRequestPayload } from 'src/common/types';
+import { CodeReviewRequest } from 'src/common/mastra/schemas';
+import { type CodeReviewRequestPayload } from 'src/common/types';
 
 import { AgentFlowService } from './agentflow.service';
 
