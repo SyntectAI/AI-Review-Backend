@@ -2,9 +2,9 @@ FROM node:22-alpine
 
 WORKDIR /app/services/agentflow
 
-COPY services/agentflow/package.json services/agentflow/package-lock.json ./
+COPY services/agentflow/package.json services/agentflow/yarn.lock ./
 
-RUN npm ci
+RUN yarn install --frozen-lockfile
 
 COPY services/agentflow/. .
 

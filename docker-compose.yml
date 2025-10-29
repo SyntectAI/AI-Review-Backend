@@ -75,7 +75,7 @@ services:
       - ./services/agentflow:/app/services/agentflow
       - ./proto:/app/proto
       - /app/services/agentflow/node_modules
-    command: sh -c "npm run start:dev"
+    command: sh -c "yarn start:dev"
 
 volumes:
   db-data:
