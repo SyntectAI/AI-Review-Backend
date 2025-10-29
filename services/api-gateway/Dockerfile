@@ -2,9 +2,9 @@ FROM node:22-alpine
 
 WORKDIR /app/services/api-gateway
 
-COPY services/api-gateway/package.json services/api-gateway/package-lock.json ./
+COPY services/api-gateway/package.json services/api-gateway/yarn.lock ./
 
-RUN npm ci
+RUN yarn install --frozen-lockfile
 
 COPY services/api-gateway/. .
 

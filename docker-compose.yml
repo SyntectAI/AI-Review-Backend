@@ -40,7 +40,7 @@ services:
       - /app/services/api-gateway/node_modules
     depends_on:
       - auth-service
-    command: sh -c "npm run start:dev"
+    command: sh -c "yarn start:dev"
 
   auth-service:
     container_name: auth-service
@@ -59,7 +59,7 @@ services:
       - /app/services/auth-service/node_modules
     depends_on:
       - postgres
-    command: sh -c "npx prisma migrate deploy && npm run start:dev"
+    command: sh -c "yarn prisma migrate deploy && yarn start:dev"
 
 volumes:
   db-data:
