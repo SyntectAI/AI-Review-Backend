@@ -1,4 +1,4 @@
-/* 
+/*
   Copyright (c) 2025 SyntectAI
   Licensed under the CC BY-NC-SA 4.0 International License.
 */
@@ -6,16 +6,16 @@ import { createTool } from '@mastra/core';
 
 import {
   codeReviewWorkflowOutputSchema,
-  PostCommentsInput,
-  postCommentsInputSchema,
+  prepareCommentsOutputSchema,
+  PreparedCommentsInput,
 } from '../schemas';
 
 export const postCommentsTool = createTool({
   id: 'post-comments',
   description: 'Post comments to a pull request',
-  inputSchema: postCommentsInputSchema,
+  inputSchema: prepareCommentsOutputSchema,
   outputSchema: codeReviewWorkflowOutputSchema,
-  execute: async ({ context }: { context: PostCommentsInput }) => {
+  execute: async ({ context }: { context: PreparedCommentsInput }) => {
     const { comments, pull_request, repository } = context;
 
     if (!comments || comments.length === 0) {
@@ -30,11 +30,7 @@ export const postCommentsTool = createTool({
     const reviewBody = {
       body: 'This is close to perfect! Please address the suggested inline change.',
       event: 'COMMENT',
-      comments: comments.map((comment) => ({
-        path: comment.path,
-        body: comment.message,
-        position: comment.line,
-      })),
+      comments,
     };
 
     const response = await fetch(endpoint, {

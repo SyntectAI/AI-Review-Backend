@@ -5,8 +5,12 @@
 
 import { createStep, Workflow } from '@mastra/core';
 
-import { codeReviewWorkflowInputSchema, codeReviewWorkflowOutputSchema } from '../schemas';
-import { fetchPullRequestTool, postCommentsTool } from '../tools';
+import {
+  codeReviewWorkflowInputSchema,
+  codeReviewWorkflowOutputSchema,
+  FetchPullRequestOutput,
+} from '../schemas';
+import { fetchPullRequestTool, postCommentsTool, prepareCommentsTool } from '../tools';
 import { analyzeCodeStep } from './steps';
 
 export const codeReviewWorkflow = new Workflow({
@@ -17,12 +21,15 @@ export const codeReviewWorkflow = new Workflow({
   .then(createStep(fetchPullRequestTool))
   .then(analyzeCodeStep)
   .map((mapApi) => {
-    const mergedData = Promise.resolve({
+    const fetchStepResult = mapApi.getStepResult('fetch-pull-request') as FetchPullRequestOutput;
+    const result = Promise.resolve({
       ...mapApi.getInitData<typeof codeReviewWorkflowInputSchema>(),
       comments: mapApi.inputData,
+      files: fetchStepResult.data?.files ?? [],
     });
 
-    return mergedData;
+    return result;
   })
+  .then(createStep(prepareCommentsTool))
   .then(createStep(postCommentsTool))
   .commit();

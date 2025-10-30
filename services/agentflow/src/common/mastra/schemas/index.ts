@@ -23,10 +23,29 @@ export const codeReviewWorkflowOutputSchema = z.object({
   success: z.boolean(),
 });
 
+export const githubFileSchema = z.object({
+  filename: z.string(),
+  patch: z.string().nullable(),
+});
+
+export const githubFilesSchema = z.array(githubFileSchema);
+
+export const changedLineSchema = z.object({
+  content: z.string(),
+  isAdded: z.boolean(),
+  lineNumber: z.number(),
+});
+
+export const changedFileSchema = z.object({
+  changes: z.array(changedLineSchema),
+  filePath: z.string(),
+  patch: z.string(),
+});
+
 export const codeReviewOutputSchema = z.object({
   data: z
     .object({
-      diff: z.string(),
+      files: z.array(changedFileSchema),
     })
     .optional(),
 });
@@ -44,6 +63,19 @@ export const analyzeCodeOutputSchema = z.array(githubReviewCommentSchema);
 export const postCommentsInputSchema = z.object({
   ...codeReviewWorkflowInputSchema.shape,
   comments: analyzeCodeOutputSchema,
+  files: z.array(changedFileSchema),
+});
+
+export const preparedCommentSchema = z.object({
+  body: z.string(),
+  path: z.string(),
+  position: z.number(),
+});
+
+export const prepareCommentsOutputSchema = z.object({
+  ...codeReviewWorkflowInputSchema.shape,
+  comments: z.array(preparedCommentSchema),
+  files: z.array(changedFileSchema),
 });
 
 export const postCommentsOutputSchema = z.object({
@@ -55,8 +87,14 @@ export const postCommentsOutputSchema = z.object({
 
 export type CodeReviewRequest = z.infer<typeof codeReviewWorkflowInputSchema>;
 
+export type FetchPullRequestOutput = z.infer<typeof codeReviewOutputSchema>;
+
+export type ChangedLine = z.infer<typeof changedLineSchema>;
+
 export type GithubReviewComment = z.infer<typeof githubReviewCommentSchema>;
 
-export type CodeReviewResponse = z.infer<typeof codeReviewWorkflowOutputSchema>;
-
 export type PostCommentsInput = z.infer<typeof postCommentsInputSchema>;
+
+export type PreparedCommentsInput = z.infer<typeof prepareCommentsOutputSchema>;
+
+export type CodeReviewResponse = z.infer<typeof codeReviewWorkflowOutputSchema>;

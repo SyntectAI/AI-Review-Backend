@@ -1,14 +1,16 @@
-/* 
+/*
   Copyright (c) 2025 SyntectAI
   Licensed under the CC BY-NC-SA 4.0 International License.
 */
 
 import { createTool } from '@mastra/core';
 
+import { parsePatch } from '../lib';
 import {
   codeReviewOutputSchema,
   CodeReviewRequest,
   codeReviewWorkflowInputSchema,
+  githubFilesSchema,
 } from '../schemas';
 
 export const fetchPullRequestTool = createTool({
@@ -28,33 +30,43 @@ export const fetchPullRequestTool = createTool({
   }: {
     context: CodeReviewRequest;
   }) => {
-    const diffUrl = `https://api.github.com/repos/${login}/${name}/pulls/${number}`;
-
-    const response = await fetch(diffUrl, {
+    const filesUrl = `https://api.github.com/repos/${login}/${name}/pulls/${number}/files`;
+    const response = await fetch(filesUrl, {
       headers: {
-        Accept: 'application/vnd.github.v3.diff',
+        Accept: 'application/vnd.github.v3+json',
         Authorization: `Bearer ${githubToken}`,
       },
     });
 
     if (!response.ok) {
       const errorBody = await response.text();
-      throw new Error(`Failed to fetch diff: ${response.statusText} - ${errorBody}`);
+      throw new Error(`Failed to fetch pull request files: ${response.statusText} - ${errorBody}`);
     }
 
-    const diff = await response.text();
+    const body = (await response.json()) as unknown;
+    const files = githubFilesSchema.parse(body);
 
-    if (!diff || !diff.trim()) {
+    if (!files || files.length === 0) {
       return {
         success: false,
-        error: new Error('Diff file is empty'),
+        error: new Error('No files found in the pull request'),
         shouldRetry: false,
       };
     }
 
+    const changedFiles = files
+      .map((file) => ({
+        changes: parsePatch(file.patch),
+        filePath: file.filename,
+        patch: file.patch ?? '',
+      }))
+      .filter((file) => file.changes.length);
+
     return {
       success: true,
-      data: { diff },
+      data: {
+        files: changedFiles,
+      },
     };
   },
 });

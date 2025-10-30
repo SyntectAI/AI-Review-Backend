@@ -4,3 +4,4 @@
 */
 export { fetchPullRequestTool } from './fetch-pull-request';
 export { postCommentsTool } from './post-comments';
+export { prepareCommentsTool } from './prepare-comments';

@@ -9,6 +9,7 @@ import { z } from 'zod';
 
 import { mastra } from '../..';
 import { CodeReviewAgentType } from '../../agents';
+import { formatChanges } from '../../lib';
 import { analyzeCodeInputSchema, analyzeCodeOutputSchema } from '../../schemas';
 
 export const analyzeCodeStep = createStep({
@@ -16,12 +17,18 @@ export const analyzeCodeStep = createStep({
   inputSchema: analyzeCodeInputSchema,
   outputSchema: analyzeCodeOutputSchema,
   execute: async ({ inputData, runtimeContext }) => {
+    const formattedChanges = formatChanges(inputData.data?.files ?? []);
+
+    if (!formattedChanges.trim()) {
+      return [];
+    }
+
     const agent = mastra.getAgent('codeReviewAgent') as CodeReviewAgentType;
     const result = await agent.generate(
       [
         {
           role: 'user',
-          content: `Perform code review on the following diff: ${inputData.data?.diff}`,
+          content: `Perform a code review on the following diff. Remember to only comment on lines starting with '+' and provide your response as a JSON object with a 'comments' key containing an array of comment objects (path, line, message).\n\nDiff:\n${formattedChanges}`,
         },
       ],
       {
@@ -34,6 +41,6 @@ export const analyzeCodeStep = createStep({
       },
     );
 
-    return result.object.comments;
+    return result.object?.comments ?? [];
   },
 });

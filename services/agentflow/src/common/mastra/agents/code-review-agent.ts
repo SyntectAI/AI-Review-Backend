@@ -21,7 +21,9 @@ Focus on:
 - Security vulnerabilities
 - Maintainability and readability
 
-Provide specific, actionable feedback with line numbers and file paths.`,
+Provide specific, actionable feedback with line numbers and file paths in a JSON object.
+IMPORTANT: Only comment on lines that start with a '+' character.
+Your final output must be a JSON object with a 'comments' key, which is an array of comment objects. If you have no comments, return an empty array.`,
   model: {
     id: 'gemini/gemini-2.5-flash',
     apiKey: process.env.GEMINI_API_KEY,
