@@ -3,7 +3,9 @@
   Licensed under the CC BY-NC-SA 4.0 International License.
 */
 
+import { createFetch, createSchema } from '@better-fetch/fetch';
 import { createTool } from '@mastra/core';
+import { z } from 'zod';
 
 import { parsePatch } from '../lib';
 import {
@@ -12,6 +14,20 @@ import {
   codeReviewWorkflowInputSchema,
   githubFilesSchema,
 } from '../schemas';
+
+const $fetch = createFetch({
+  baseURL: 'https://api.github.com',
+  schema: createSchema({
+    '/repos/:owner/:repo/pulls/:number/files': {
+      output: githubFilesSchema,
+      params: z.object({
+        number: z.string(),
+        owner: z.string(),
+        repo: z.string(),
+      }),
+    },
+  }),
+});
 
 export const fetchPullRequestTool = createTool({
   id: 'fetch-pull-request',
@@ -30,23 +46,27 @@ export const fetchPullRequestTool = createTool({
   }: {
     context: CodeReviewRequest;
   }) => {
-    const filesUrl = `https://api.github.com/repos/${login}/${name}/pulls/${number}/files`;
-    const response = await fetch(filesUrl, {
+    const files = await $fetch('/repos/:owner/:repo/pulls/:number/files', {
       headers: {
         Accept: 'application/vnd.github.v3+json',
         Authorization: `Bearer ${githubToken}`,
       },
+      params: {
+        number: number.toString(),
+        owner: login,
+        repo: name,
+      },
     });
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(`Failed to fetch pull request files: ${response.statusText} - ${errorBody}`);
+    if (files.error) {
+      const { message, statusText } = files.error;
+      const errorMessage = `Failed to fetch pull request files: ${message} (${statusText}) - ${JSON.stringify(
+        files.error,
+      )}`;
+      throw new Error(errorMessage);
     }
 
-    const body = (await response.json()) as unknown;
-    const files = githubFilesSchema.parse(body);
-
-    if (!files || files.length === 0) {
+    if (!files.data?.length) {
       return {
         success: false,
         error: new Error('No files found in the pull request'),
@@ -54,7 +74,7 @@ export const fetchPullRequestTool = createTool({
       };
     }
 
-    const changedFiles = files
+    const changedFiles = files.data
       .map((file) => ({
         changes: parsePatch(file.patch),
         filePath: file.filename,

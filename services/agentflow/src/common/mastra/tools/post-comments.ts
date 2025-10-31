@@ -2,7 +2,10 @@
   Copyright (c) 2025 SyntectAI
   Licensed under the CC BY-NC-SA 4.0 International License.
 */
+
+import { createFetch, createSchema } from '@better-fetch/fetch';
 import { createTool } from '@mastra/core';
+import { z } from 'zod';
 
 import {
   codeReviewWorkflowOutputSchema,
@@ -10,22 +13,38 @@ import {
   PreparedCommentsInput,
 } from '../schemas';
 
+const $fetch = createFetch({
+  baseURL: 'https://api.github.com',
+  schema: createSchema({
+    '@post/repos/:owner/:repo/pulls/:number/reviews': {
+      output: z.object({ id: z.number() }),
+      params: z.object({ number: z.string(), owner: z.string(), repo: z.string() }),
+    },
+  }),
+});
+
 export const postCommentsTool = createTool({
   id: 'post-comments',
   description: 'Post comments to a pull request',
   inputSchema: prepareCommentsOutputSchema,
   outputSchema: codeReviewWorkflowOutputSchema,
   execute: async ({ context }: { context: PreparedCommentsInput }) => {
-    const { comments, pull_request, repository } = context;
+    const {
+      comments,
+      pull_request: { number: pullRequestNumber },
+      repository: {
+        name: repositoryName,
+        owner: { login: ownerLogin },
+      },
+    } = context;
+    const { githubToken } = context;
 
-    if (!comments || comments.length === 0) {
+    if (!comments?.length) {
       return {
         success: true,
         data: { posted: false, message: 'No comments to post' },
       };
     }
-
-    const endpoint = `https://api.github.com/repos/${repository.owner.login}/${repository.name}/pulls/${pull_request.number}/reviews`;
 
     const reviewBody = {
       body: 'This is close to perfect! Please address the suggested inline change.',
@@ -33,26 +52,30 @@ export const postCommentsTool = createTool({
       comments,
     };
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
+    const result = await $fetch('@post/repos/:owner/:repo/pulls/:number/reviews', {
+      body: reviewBody,
       headers: {
-        Authorization: `Bearer ${context.githubToken}`,
         Accept: 'application/vnd.github+json',
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${githubToken}`,
       },
-      body: JSON.stringify(reviewBody),
+      params: {
+        number: pullRequestNumber.toString(),
+        owner: ownerLogin,
+        repo: repositoryName,
+      },
     });
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(`Failed to post review: ${response.statusText} - ${errorBody}`);
+    if (result.error) {
+      const { message, statusText } = result.error;
+      const errorMessage = `Failed to post review: ${message} (${statusText}) - ${JSON.stringify(
+        result.error,
+      )}`;
+      throw new Error(errorMessage);
     }
-
-    const result = (await response.json()) as { id: string };
 
     return {
       success: true,
-      data: { posted: true, reviewId: result.id },
+      data: { posted: true, reviewId: result.data.id },
     };
   },
 });
