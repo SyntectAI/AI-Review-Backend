@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { changedFileSchema, ChangedLine } from '../schemas';
+import { ChangedLine, changedFileSchema } from '../schemas';
 
 export const parsePatch = (patch: string | null) => {
   if (!patch) {
@@ -15,7 +15,7 @@ export const parsePatch = (patch: string | null) => {
       const match = line.match(/\+(\d+)/);
 
       if (match) {
-        currentLineNumber = parseInt(match[1], 10);
+        currentLineNumber = Number.parseInt(match[1], 10);
       }
 
       continue;
@@ -50,7 +50,7 @@ export const getPositionFromLine = (patch: string, lineNumber: number) => {
       const match = line.match(/\+(\d+)/);
 
       if (match) {
-        currentLine = parseInt(match[1], 10);
+        currentLine = Number.parseInt(match[1], 10);
       }
     } else if (!line.startsWith('-')) {
       if (currentLine === lineNumber) {

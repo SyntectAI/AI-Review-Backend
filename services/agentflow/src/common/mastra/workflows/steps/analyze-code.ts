@@ -3,19 +3,14 @@
   Licensed under the CC BY-NC-SA 4.0 International License.
 */
 
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { createStep } from '@mastra/core';
 import { z } from 'zod';
 
-import { mastra } from '../..';
-import { CodeReviewAgentType } from '../../agents';
+import { codeReviewAgent } from '../../agents';
 import { formatChanges } from '../../lib';
 import { analyzeCodeInputSchema, analyzeCodeOutputSchema } from '../../schemas';
 
 export const analyzeCodeStep = createStep({
-  id: 'analyze-code-step',
-  inputSchema: analyzeCodeInputSchema,
-  outputSchema: analyzeCodeOutputSchema,
   execute: async ({ inputData, runtimeContext }) => {
     const formattedChanges = formatChanges(inputData.data?.files ?? []);
 
@@ -23,12 +18,11 @@ export const analyzeCodeStep = createStep({
       return [];
     }
 
-    const agent = mastra.getAgent('codeReviewAgent') as CodeReviewAgentType;
-    const result = await agent.generate(
+    const result = await codeReviewAgent.generate(
       [
         {
-          role: 'user',
           content: `Perform a code review on the following diff. Remember to only comment on lines starting with '+' and provide your response as a JSON object with a 'comments' key containing an array of comment objects (path, line, message).\n\nDiff:\n${formattedChanges}`,
+          role: 'user',
         },
       ],
       {
@@ -43,4 +37,7 @@ export const analyzeCodeStep = createStep({
 
     return result.object?.comments ?? [];
   },
+  id: 'analyze-code-step',
+  inputSchema: analyzeCodeInputSchema,
+  outputSchema: analyzeCodeOutputSchema,
 });

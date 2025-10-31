@@ -5,7 +5,6 @@
 import { Agent } from '@mastra/core/agent';
 
 export const codeReviewAgent = new Agent({
-  name: 'code-review-agent',
   id: 'code-review-agent',
   instructions: `You are an AI code review assistant. Your task is to:
 1. Validate incoming webhook requests for security
@@ -25,9 +24,10 @@ Provide specific, actionable feedback with line numbers and file paths in a JSON
 IMPORTANT: Only comment on lines that start with a '+' character.
 Your final output must be a JSON object with a 'comments' key, which is an array of comment objects. If you have no comments, return an empty array.`,
   model: {
-    id: 'gemini/gemini-2.5-flash',
     apiKey: process.env.GEMINI_API_KEY,
+    id: 'gemini/gemini-2.5-flash',
   },
+  name: 'code-review-agent',
 });
 
 export type CodeReviewAgentType = typeof codeReviewAgent;

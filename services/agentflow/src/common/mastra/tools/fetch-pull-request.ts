@@ -9,8 +9,8 @@ import { z } from 'zod';
 
 import { parsePatch } from '../lib';
 import {
-  codeReviewOutputSchema,
   CodeReviewRequest,
+  codeReviewOutputSchema,
   codeReviewWorkflowInputSchema,
   githubFilesSchema,
 } from '../schemas';
@@ -30,10 +30,7 @@ const $fetch = createFetch({
 });
 
 export const fetchPullRequestTool = createTool({
-  id: 'fetch-pull-request',
   description: 'Fetch a pull request from GitHub',
-  inputSchema: codeReviewWorkflowInputSchema,
-  outputSchema: codeReviewOutputSchema,
   execute: async ({
     context: {
       githubToken,
@@ -68,9 +65,9 @@ export const fetchPullRequestTool = createTool({
 
     if (!files.data?.length) {
       return {
-        success: false,
         error: new Error('No files found in the pull request'),
         shouldRetry: false,
+        success: false,
       };
     }
 
@@ -83,10 +80,13 @@ export const fetchPullRequestTool = createTool({
       .filter((file) => file.changes.length);
 
     return {
-      success: true,
       data: {
         files: changedFiles,
       },
+      success: true,
     };
   },
+  id: 'fetch-pull-request',
+  inputSchema: codeReviewWorkflowInputSchema,
+  outputSchema: codeReviewOutputSchema,
 });

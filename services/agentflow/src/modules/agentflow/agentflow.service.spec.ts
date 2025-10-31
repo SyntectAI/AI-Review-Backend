@@ -2,6 +2,7 @@
   Copyright (c) 2025 SyntectAI
   Licensed under the CC BY-NC-SA 4.0 International License.
 */
+/** biome-ignore-all lint/complexity/useLiteralKeys: <soft private access> */
 import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CodeReviewRequest } from 'src/common/mastra/schemas';
@@ -44,6 +45,7 @@ describe('AgentFlowService', () => {
 
   describe('startCodeReview', () => {
     const codeReviewRequest: CodeReviewRequest = {
+      githubToken: 'test-token',
       pull_request: {
         diff_url: 'http://example.com/diff',
         html_url: 'http://example.com/pr',
@@ -56,7 +58,6 @@ describe('AgentFlowService', () => {
           login: 'test-owner',
         },
       },
-      githubToken: 'test-token',
     };
 
     it('should start code review workflow successfully', async () => {
@@ -66,7 +67,9 @@ describe('AgentFlowService', () => {
 
       expect(mastra.getWorkflow).toHaveBeenCalledWith('codeReviewWorkflow');
       expect(mockWorkflow.createRunAsync).toHaveBeenCalled();
-      expect(mockRun.start).toHaveBeenCalledWith({ inputData: codeReviewRequest });
+      expect(mockRun.start).toHaveBeenCalledWith({
+        inputData: codeReviewRequest,
+      });
       expect(response).toEqual({ success: true });
     });
 

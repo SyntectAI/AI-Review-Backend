@@ -15,7 +15,9 @@ export const codeReviewWorkflowInputSchema = z.object({
   }),
   repository: z.object({
     name: z.string(),
-    owner: z.object({ login: z.string() }),
+    owner: z.object({
+      login: z.string(),
+    }),
   }),
 });
 

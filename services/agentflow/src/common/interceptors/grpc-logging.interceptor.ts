@@ -23,26 +23,16 @@ export class GrpcLoggingInterceptor implements NestInterceptor {
     const sanitizedData = this.sanitizeRequestBody(data);
 
     const logData = {
-      message: 'INCOMING REQUEST',
-      traceId,
-      method,
       body: sanitizedData,
+      message: 'INCOMING REQUEST',
+      method,
+      traceId,
     };
 
     this.logger.log(logData);
 
     return next.handle().pipe(
       tap({
-        finalize: () => {
-          const duration = Date.now() - startTime;
-          const responseLogData = {
-            message: 'PERFORMANCE',
-            traceId,
-            elapsed: `${duration}ms`,
-          };
-
-          this.logger.log(responseLogData);
-        },
         error: (error: Error) => {
           const errorLogData = {
             traceId,
@@ -51,6 +41,16 @@ export class GrpcLoggingInterceptor implements NestInterceptor {
           };
 
           this.logger.error(errorLogData);
+        },
+        finalize: () => {
+          const duration = Date.now() - startTime;
+          const responseLogData = {
+            elapsed: `${duration}ms`,
+            message: 'PERFORMANCE',
+            traceId,
+          };
+
+          this.logger.log(responseLogData);
         },
       }),
     );

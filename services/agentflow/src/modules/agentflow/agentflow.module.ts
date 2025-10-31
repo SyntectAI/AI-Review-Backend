@@ -9,7 +9,7 @@ import { AgentFlowService } from './agentflow.service';
 
 @Module({
   controllers: [AgentFlowController],
-  providers: [AgentFlowService],
   exports: [AgentFlowService],
+  providers: [AgentFlowService],
 })
 export class AgentFlowModule {}

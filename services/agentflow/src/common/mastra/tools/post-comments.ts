@@ -9,25 +9,28 @@ import { z } from 'zod';
 
 import {
   codeReviewWorkflowOutputSchema,
-  prepareCommentsOutputSchema,
   PreparedCommentsInput,
+  prepareCommentsOutputSchema,
 } from '../schemas';
 
 const $fetch = createFetch({
   baseURL: 'https://api.github.com',
   schema: createSchema({
     '@post/repos/:owner/:repo/pulls/:number/reviews': {
-      output: z.object({ id: z.number() }),
-      params: z.object({ number: z.string(), owner: z.string(), repo: z.string() }),
+      output: z.object({
+        id: z.number(),
+      }),
+      params: z.object({
+        number: z.string(),
+        owner: z.string(),
+        repo: z.string(),
+      }),
     },
   }),
 });
 
 export const postCommentsTool = createTool({
-  id: 'post-comments',
   description: 'Post comments to a pull request',
-  inputSchema: prepareCommentsOutputSchema,
-  outputSchema: codeReviewWorkflowOutputSchema,
   execute: async ({ context }: { context: PreparedCommentsInput }) => {
     const {
       comments,
@@ -41,15 +44,18 @@ export const postCommentsTool = createTool({
 
     if (!comments?.length) {
       return {
+        data: {
+          message: 'No comments to post',
+          posted: false,
+        },
         success: true,
-        data: { posted: false, message: 'No comments to post' },
       };
     }
 
     const reviewBody = {
       body: 'This is close to perfect! Please address the suggested inline change.',
-      event: 'COMMENT',
       comments,
+      event: 'COMMENT',
     };
 
     const result = await $fetch('@post/repos/:owner/:repo/pulls/:number/reviews', {
@@ -74,8 +80,14 @@ export const postCommentsTool = createTool({
     }
 
     return {
+      data: {
+        posted: true,
+        reviewId: result.data.id,
+      },
       success: true,
-      data: { posted: true, reviewId: result.data.id },
     };
   },
+  id: 'post-comments',
+  inputSchema: prepareCommentsOutputSchema,
+  outputSchema: codeReviewWorkflowOutputSchema,
 });

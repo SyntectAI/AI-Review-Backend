@@ -30,7 +30,9 @@ export class AgentFlowService {
         .start({
           inputData,
         })
-        .then(() => ({ success: true }))
+        .then(() => ({
+          success: true,
+        }))
         .catch((error) => {
           this.logger.error(`Failed to start Mastra workflow ${workflowId}:`, error);
 

@@ -13,15 +13,15 @@ import {
 } from '../schemas';
 
 export const prepareCommentsTool = createTool({
-  id: 'prepare-comments-tool',
   description: 'Sorts, filters, and prepares comments for posting.',
-  inputSchema: postCommentsInputSchema,
-  outputSchema: prepareCommentsOutputSchema,
   execute: async ({ context }: { context: PostCommentsInput }) => {
     const { comments, files } = context;
 
     if (!comments?.length) {
-      return { ...context, comments: [] };
+      return {
+        ...context,
+        comments: [],
+      };
     }
 
     const uniqueComments = comments
@@ -36,9 +36,9 @@ export const prepareCommentsTool = createTool({
         const prev = self[index - 1];
 
         return !(
-          comment.path === prev.path &&
-          comment.message === prev.message &&
-          comment.line === prev.line + 1
+          comment.path === prev.path
+          && comment.message === prev.message
+          && comment.line === prev.line + 1
         );
       });
 
@@ -57,12 +57,23 @@ export const prepareCommentsTool = createTool({
         };
       })
       .filter(
-        (comment): comment is { body: string; path: string; position: number } =>
-          comment !== null && comment.position !== null,
+        (
+          comment,
+        ): comment is {
+          body: string;
+          path: string;
+          position: number;
+        } => comment !== null && comment.position !== null,
       );
 
-    const result = Promise.resolve({ ...context, comments: preparedComments });
+    const result = Promise.resolve({
+      ...context,
+      comments: preparedComments,
+    });
 
     return result;
   },
+  id: 'prepare-comments-tool',
+  inputSchema: postCommentsInputSchema,
+  outputSchema: prepareCommentsOutputSchema,
 });

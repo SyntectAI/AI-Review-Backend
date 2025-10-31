@@ -22,6 +22,7 @@ export class AppLogger extends ConsoleLogger {
     super(context || 'AppLogger');
   }
 
+  // biome-ignore lint/nursery/useMaxParams: <Nest.js ConsoleLogger method accepts up to 4 parameters>
   protected printMessages(
     messages: unknown[],
     _context?: string,
@@ -31,9 +32,9 @@ export class AppLogger extends ConsoleLogger {
     const logData = Array.isArray(messages) ? messages[0] : messages;
 
     const logEntry: LogData = {
-      timestamp: new Date().toISOString(),
       level: logLevel === 'log' ? 'info' : logLevel,
       message: typeof logData === 'string' ? logData : 'gRPC Request',
+      timestamp: new Date().toISOString(),
     };
 
     if (typeof logData === 'object' && logData !== null) {
@@ -57,6 +58,6 @@ export class AppLogger extends ConsoleLogger {
     }
 
     const stream = writeStreamType === 'stderr' ? process.stderr : process.stdout;
-    stream.write(JSON.stringify(logEntry) + '\n');
+    stream.write(`${JSON.stringify(logEntry)}\n`);
   }
 }
