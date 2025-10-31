@@ -2,6 +2,7 @@
   Copyright (c) 2025 SyntectAI
   Licensed under the CC BY-NC-SA 4.0 International License.
 */
+import { Metadata } from '@grpc/grpc-js';
 import {
   BadRequestException,
   Body,
@@ -16,6 +17,7 @@ import {
 } from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { ApiTags } from '@nestjs/swagger';
+import { CustomRpcMetadata } from 'src/common/decorators/custom-rpc-metadata.decorator';
 import { GithubSignatureGuard } from 'src/common/guards/github-signature.guard';
 import { type AgentFlowService, CodeReviewRequestPayload } from 'src/common/interfaces';
 import { ReviewRequestValidationPipe } from 'src/common/pipes/review-request-mapper.pipe';
@@ -40,6 +42,7 @@ export class AgentflowController implements OnModuleInit {
   startCodeReview(
     @Headers('X-GitHub-Event') githubEvent: string,
     @Body(new ReviewRequestValidationPipe()) body: CodeReviewRequestDto,
+    @CustomRpcMetadata() metadata: Metadata,
   ) {
     if (githubEvent !== 'pull_request') {
       throw new BadRequestException('Event ignored: not a pull request event.');
@@ -54,7 +57,7 @@ export class AgentflowController implements OnModuleInit {
       webhookPayload: JSON.stringify(body),
     };
 
-    this.agentflowService.startCodeReview(request).subscribe({
+    this.agentflowService.startCodeReview(request, metadata).subscribe({
       next: () => {
         this.logger.log('Successfully initiated code review workflow.');
       },
