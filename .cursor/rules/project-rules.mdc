@@ -1,0 +1,5 @@
+---
+alwaysApply: true
+---
+CRITICAL: don't EVER start any microservice LOCALLY and don't try to build an app!
+we already have docker containers!

@@ -6,18 +6,17 @@ import { Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 
 import { AppConfigModule } from './common/config/config.module';
-import { AppLoggingInterceptor } from './common/interceptors/app-logger.interceptor';
+import { GrpcLoggingInterceptor } from './common/interceptors/grpc-logging.interceptor';
 import { AppLogger } from './common/logger/app-logger';
-import { AgentflowModule } from './modules/agentflow/agentflow.module';
-import { AuthModule } from './modules/auth/auth.module';
+import { AgentFlowModule } from './modules/agentflow/agentflow.module';
 
 @Module({
-  imports: [AppConfigModule, AuthModule, AgentflowModule],
+  imports: [AppConfigModule, AgentFlowModule],
   providers: [
     AppLogger,
     {
       provide: APP_INTERCEPTOR,
-      useClass: AppLoggingInterceptor,
+      useClass: GrpcLoggingInterceptor,
     },
   ],
 })

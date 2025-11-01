@@ -61,6 +61,22 @@ services:
       - postgres
     command: sh -c "yarn prisma migrate deploy && yarn start:dev"
 
+  agentflow-service:
+    container_name: agentflow-service
+    build:
+      context: .
+      dockerfile: ./services/agentflow/Dockerfile
+    ports:
+      - 50052:50052
+    env_file:
+      - ./services/agentflow/.env
+    restart: unless-stopped
+    volumes:
+      - ./services/agentflow:/app/services/agentflow
+      - ./proto:/app/proto
+      - /app/services/agentflow/node_modules
+    command: sh -c "yarn start:dev"
+
 volumes:
   db-data:
   pgadmin-data:
