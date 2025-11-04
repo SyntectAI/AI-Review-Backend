@@ -17,6 +17,7 @@ export interface CodeReviewRepository {
 }
 
 export interface CodeReviewRequest {
+  action: 'opened' | 'reopened' | 'closed';
   pull_request: CodeReviewPullRequest;
   repository: CodeReviewRepository;
 }

@@ -17,6 +17,7 @@ import {
 } from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { ApiTags } from '@nestjs/swagger';
+import { AgentflowSwagger } from 'src/common/decorators/agentflow-swagger.decorator';
 import { CustomRpcMetadata } from 'src/common/decorators/custom-rpc-metadata.decorator';
 import { GithubSignatureGuard } from 'src/common/guards/github-signature.guard';
 import { type AgentFlowService, CodeReviewRequestPayload } from 'src/common/interfaces';
@@ -39,6 +40,7 @@ export class AgentflowController implements OnModuleInit {
 
   @Post('review')
   @UseGuards(GithubSignatureGuard)
+  @AgentflowSwagger.startCodeReview()
   startCodeReview(
     @Headers('X-GitHub-Event') githubEvent: string,
     @Body(new ReviewRequestValidationPipe()) body: CodeReviewRequestDto,
@@ -50,6 +52,11 @@ export class AgentflowController implements OnModuleInit {
 
     if (!process.env.GITHUB_TOKEN) {
       throw new ForbiddenException('GitHub token is not set');
+    }
+
+    if (body.action !== 'opened') {
+      this.logger.log('Event ignored: action must be "opened".');
+      return { success: false };
     }
 
     const request: CodeReviewRequestPayload = {

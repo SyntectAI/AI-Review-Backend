@@ -9,6 +9,7 @@ import { CodeReviewRequest } from '../interfaces';
 @Injectable()
 export class ReviewRequestValidationPipe implements PipeTransform {
   transform({
+    action,
     pull_request: { diff_url, html_url, number, title },
     repository: {
       name,
@@ -16,6 +17,7 @@ export class ReviewRequestValidationPipe implements PipeTransform {
     },
   }: CodeReviewRequest): CodeReviewRequest {
     return {
+      action,
       pull_request: {
         diff_url,
         html_url,
