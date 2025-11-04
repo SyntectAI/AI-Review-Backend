@@ -22,7 +22,7 @@ interface RpcError {
 interface BadRequestExceptionDetails {
   message?: string;
   details?: Array<{ field: string; message: string }>;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 @Catch()
@@ -56,8 +56,8 @@ export class RpcToHttpExceptionFilter implements ExceptionFilter {
       const status = exception.getStatus() as HttpStatus;
       const exceptionResponse = exception.getResponse();
       const error: Record<string, unknown> = {
-        statusCode: status,
         message: exception.message,
+        statusCode: status,
         timestamp: new Date().toISOString(),
       };
 
@@ -77,19 +77,18 @@ export class RpcToHttpExceptionFilter implements ExceptionFilter {
     response
       .status(httpStatus)
       .json({
-        statusCode: httpStatus,
         message,
+        statusCode: httpStatus,
         timestamp: new Date().toISOString(),
       })
       .on('finish', () => {
         this.logger.error({
-          message: 'ERROR',
           error: {
             code: httpStatus,
             message,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             traceId: request.headers['x-trace-id'],
           },
+          message: 'ERROR',
           timestamp: new Date().toISOString(),
         });
       });

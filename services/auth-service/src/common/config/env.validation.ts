@@ -6,8 +6,8 @@ import { z } from 'zod';
 
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1, 'Database URL is required'),
-  JWT_SECRET_KEY: z.string().min(1, 'JWT secret key is required'),
   JWT_ACCESS_TOKEN_EXPIRES_IN: z.string().default('10d'),
+  JWT_SECRET_KEY: z.string().min(1, 'JWT secret key is required'),
 });
 
 export type Env = z.infer<typeof envSchema>;

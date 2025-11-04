@@ -11,13 +11,13 @@ import { AgentflowController } from './agentflow.controller';
 import { JwtStrategy } from './jwt.strategy';
 
 @Module({
-  imports: [AgentflowClientModule, PassportModule],
   controllers: [AgentflowController],
+  imports: [AgentflowClientModule, PassportModule],
   providers: [
     {
+      inject: [ConfigService],
       provide: JwtStrategy,
       useFactory: (configService: ConfigService) => new JwtStrategy(configService),
-      inject: [ConfigService],
     },
   ],
 })

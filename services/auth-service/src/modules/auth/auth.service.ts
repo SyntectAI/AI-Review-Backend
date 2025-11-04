@@ -43,8 +43,8 @@ export class AuthService {
     return {
       accessToken: this.jwtService.sign({
         email,
-        sub: id,
         role,
+        sub: id,
       }),
     };
   }
@@ -72,8 +72,8 @@ export class AuthService {
     return {
       accessToken: this.jwtService.sign({
         email,
-        sub: user.id,
         role: user.role,
+        sub: user.id,
       }),
     };
   }

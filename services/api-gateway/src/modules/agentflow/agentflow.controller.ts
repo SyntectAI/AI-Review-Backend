@@ -58,11 +58,11 @@ export class AgentflowController implements OnModuleInit {
     };
 
     this.agentflowService.startCodeReview(request, metadata).subscribe({
-      next: () => {
-        this.logger.log('Successfully initiated code review workflow.');
-      },
       error: (err) => {
         this.logger.error(`Error initiating code review workflow: ${err}`);
+      },
+      next: () => {
+        this.logger.log('Successfully initiated code review workflow.');
       },
     });
 
