@@ -11,11 +11,11 @@ import {
   PipeTransform,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
-import { validate, ValidationError } from 'class-validator';
+import { ValidationError, validate } from 'class-validator';
 
-type Constructor<T = object> = new (...args: any[]) => T;
+type Constructor<T = object> = new (...args: unknown[]) => T;
 type PrimitiveConstructor =
-  | Constructor<Array<any>>
+  | Constructor<unknown[]>
   | Constructor<boolean>
   | Constructor<number>
   | Constructor<object>
@@ -28,7 +28,7 @@ export class CustomValidationPipe<T extends object = Record<string, unknown>>
   private readonly logger = new Logger(CustomValidationPipe.name);
 
   async transform(value: unknown, { metatype }: ArgumentMetadata): Promise<T> {
-    if (!metatype || !this.toValidate(metatype)) {
+    if (!(metatype && this.toValidate(metatype))) {
       return value as T;
     }
 
@@ -41,8 +41,8 @@ export class CustomValidationPipe<T extends object = Record<string, unknown>>
       const validationErrors = this.formatValidationErrors(errors);
 
       throw new BadRequestException({
-        message: 'Validation failed',
         details: validationErrors,
+        message: 'Validation failed',
       });
     }
 

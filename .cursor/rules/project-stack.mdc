@@ -1,0 +1,212 @@
+# AI Review Backend - Technology Stack & Architecture
+
+## Technology Stack
+
+### Core
+- **NestJS**: Microservices framework
+- **TypeScript**: Type-safe JavaScript
+- **Node.js**: Runtime environment
+
+### Database
+- **PostgreSQL**: Primary database
+- **Prisma**: ORM with migrations, binary targets for Docker (`linux-musl-arm64-openssl-3.0.x`)
+
+### Communication
+- **gRPC**: Inter-service communication (`@grpc/grpc-js`, `@grpc/proto-loader`, Protocol Buffers)
+- **HTTP/REST**: External API via API Gateway
+- **WebSockets**: Socket.IO (agentflow service)
+
+### AI & Workflow
+- **Mastra Framework** (`@mastra/core`): AI workflow orchestration (agents, workflows, tools)
+- **Google Gemini AI** (`@ai-sdk/google`): LLM provider (`gemini/gemini-2.5-flash`)
+- **Mastra Memory** (`@mastra/memory`): Memory management
+
+### Security & Auth
+- **JWT** (`@nestjs/jwt`): Token-based authentication
+- **Passport.js** (`@nestjs/passport`, `passport-jwt`): Authentication middleware
+- **bcrypt**: Password hashing
+- **CASL** (`@casl/ability`, `@casl/prisma`): Authorization
+- **HMAC-SHA256**: GitHub webhook signature verification
+
+### Development
+- **Biome**: Linting and formatting (all services)
+- **Jest** + **ts-jest**: Testing framework
+- **Swagger/OpenAPI**: API documentation
+- **class-validator** + **class-transformer**: DTO validation and transformation
+- **Zod**: Runtime schema validation
+- **Docker** + **Docker Compose**: Containerization and orchestration
+
+### Utilities
+- **@better-fetch/fetch**: Enhanced fetch with schema validation for GitHub API
+- **UUID**: Unique identifier generation
+- **RxJS**: Reactive programming (NestJS microservices)
+
+## Architecture
+
+### Microservices Architecture
+Three microservices communicating via gRPC:
+
+1. **API Gateway** (Port 3000): HTTP-to-gRPC translation layer
+2. **Auth Service** (Port 50051): Authentication microservice
+3. **AgentFlow Service** (Port 50052): AI-powered code review microservice
+
+```
+Client (HTTP) → API Gateway → gRPC → Microservices → PostgreSQL
+                     ↓
+              GitHub Webhooks
+```
+
+## Microservices
+
+### 1. API Gateway Service
+**Port**: 3000 (HTTP/REST)
+
+**Modules**: `AuthModule`, `AgentflowModule`, `AppConfigModule`, `AppLoggingInterceptor`
+
+**Features**:
+- HTTP-to-gRPC translation
+- CORS with origin validation
+- Global exception filter (`RpcToHttpExceptionFilter`): Maps gRPC → HTTP status codes
+- Global validation pipe (`CustomValidationPipe`): DTO validation
+- Swagger documentation at `/docs`
+- JWT authentication guards
+- GitHub webhook signature verification (`GithubSignatureGuard`)
+
+**Endpoints**:
+- `POST /api/auth/signup`: User registration
+- `POST /api/auth/signin`: User authentication
+- `POST /api/agentflow/review`: Trigger code review workflow (protected, webhook-verified)
+
+**gRPC Clients**: `AUTH_SERVICE` (port 50051), `AGENTFLOW_SERVICE` (port 50052)
+
+**Error Mapping**: `UNAUTHENTICATED` → 401, `ALREADY_EXISTS` → 409, `INVALID_ARGUMENT` → 400, `NOT_FOUND` → 404, `PERMISSION_DENIED` → 403, `INTERNAL` → 500
+
+### 2. Auth Service
+**Port**: 50051 (gRPC)
+
+**Modules**: `AuthModule`, `PrismaModule`
+
+**Database Schema** (`User` model):
+- `id`: UUID (auto-generated)
+- `email`: String (unique)
+- `password`: String (bcrypt hashed)
+- `role`: Enum (ADMIN, USER)
+- `createdAt`, `updatedAt`: DateTime
+
+**gRPC Methods**:
+- `SignUp(AuthRequest) → AuthResponse`: Creates user, returns JWT
+- `SignIn(AuthRequest) → AuthResponse`: Validates credentials, returns JWT
+
+**Business Logic**: Password hashing (bcrypt), email uniqueness validation, credential verification, JWT token generation with claims (email, sub, role)
+
+**Error Handling**: `ALREADY_EXISTS` (email duplicate), `UNAUTHENTICATED` (invalid credentials)
+
+### 3. AgentFlow Service
+**Port**: 50052 (gRPC)
+
+**Modules**: `AgentFlowModule` with Mastra integration (`agents/`, `workflows/`, `tools/`, `schemas/`)
+
+**gRPC Methods**: `StartCodeReview(CodeReviewRequest) → CodeReviewResponse`
+
+**Mastra Workflow: `codeReviewWorkflow`**
+1. **Fetch Pull Request** (`fetchPullRequestTool`): Authenticates with GitHub API, fetches PR diffs, parses patch files, filters changed files
+2. **Analyze Code** (`analyzeCodeStep`): Formats changes, sends to Gemini AI via Mastra agent, generates structured JSON comments
+3. **Prepare Comments** (`prepareCommentsTool`): Sorts by file/line, deduplicates, maps line numbers to patch positions, validates positions
+4. **Post Comments** (`postCommentsTool`): Creates GitHub PR review, posts inline comments, returns review ID
+
+**AI Agent: `codeReviewAgent`**
+- Model: Google Gemini 2.5 Flash
+- Analyzes code diffs for quality, bugs, security, performance
+- Output: Structured JSON comments in Russian
+- Constraints: Only comments on lines starting with `+` (additions)
+
+**Schemas** (Zod validation): `codeReviewWorkflowInputSchema`, `codeReviewWorkflowOutputSchema`, `githubFilesSchema`, `changedFileSchema`, `githubReviewCommentSchema`
+
+**Error Handling**: Workflow errors logged with `success: false`, GitHub API errors propagated, patch parsing errors filtered gracefully
+
+## Architectural Patterns
+
+### Communication
+- **Protocol**: gRPC for inter-service communication
+- **Service Discovery**: Direct URL-based connections (environment variables)
+- **Contract-First**: Proto files define service contracts
+- **Type Safety**: TypeScript interfaces generated from proto definitions
+
+### Error Handling
+- **Layered Exception Handling**: Microservices throw `RpcException` with gRPC status codes → API Gateway converts to HTTP exceptions → Global filter ensures consistent responses
+- **Error Mapping**: Comprehensive gRPC-to-HTTP status code mapping
+- **Workflow Errors**: Logged but return `success: false` (fire-and-forget pattern)
+- **API Errors**: Propagated with detailed messages
+- **Validation Errors**: Returned immediately with 400 status
+
+### Validation
+- **DTO Validation**: `class-validator` decorators on request DTOs
+- **Schema Validation**: Zod schemas for Mastra workflow inputs/outputs
+- **Runtime Validation**: Global validation pipe processes all requests
+- **Type Safety**: TypeScript types derived from Zod schemas
+
+### Security
+- **Password Security**: bcrypt hashing with salt rounds (passwords never stored in plain text)
+- **Token-Based Auth**: JWT tokens with user claims (ID, email, role)
+- **Webhook Verification**: HMAC-SHA256 signature validation
+- **CORS Protection**: Configurable origin and header restrictions
+- **gRPC Encryption**: Built-in TLS support (configurable)
+- **GitHub Token**: Environment-based storage, requires repository read/write permissions
+
+### Logging & Observability
+- **Custom Logger**: Structured logging with context
+- **Request Logging**: HTTP request/response logging via interceptor
+- **gRPC Logging**: gRPC call logging via interceptor
+- **Error Logging**: Structured error logging with trace IDs
+
+### Configuration
+- **Environment Variables**: ConfigService for centralized configuration
+- **Validation**: Environment variable validation schemas
+- **Service URLs**: Configurable microservice endpoints
+- **Secret Management**: Environment-based secret storage
+
+## Development Workflow
+
+### Linting & Formatting
+- **Biome**: Linting and formatting (all services)
+- **Import Sorting**: Automatic import organization
+- **Type Checking**: Strict TypeScript compilation
+
+### Testing
+- **Jest**: Unit and E2E tests
+- **Test Coverage**: Coverage reporting configured
+
+### Database Migrations
+- **Prisma Migrations**: Version-controlled schema changes
+- **Migration Deployment**: Automatic migration on container startup (auth-service)
+- **Schema Generation**: Prisma client generation with binary targets
+
+### Build & Deployment
+- **Docker Containers**: Each service containerized
+- **Docker Compose**: Orchestrated multi-container setup
+- **Volume Mounting**: Development mode with hot-reload
+- **Production Build**: Compiled TypeScript to JavaScript
+
+## Design Decisions
+
+### gRPC vs HTTP
+- **Rationale**: Type-safe contracts, better performance for inter-service communication
+- **Trade-off**: HTTP for external API, gRPC for internal services
+
+### Mastra Framework
+- **Rationale**: Simplifies AI workflow orchestration with agents, tools, and workflows
+- **Benefits**: Declarative workflow definition, built-in error handling, structured outputs
+
+### Single Database (PostgreSQL)
+- **Current**: Only auth-service uses database
+- **Future**: AgentFlow service may need separate database for workflow state
+
+### Webhook Processing
+- **Asynchronous**: Webhook endpoint returns immediately
+- **Fire-and-Forget**: Workflow execution happens in background
+- **No State Tracking**: No persistence of workflow runs (future enhancement)
+
+### Patch Position Calculation
+- **Complexity**: GitHub requires patch positions, not line numbers
+- **Solution**: `getPositionFromLine` utility calculates position from patch context
+- **Edge Cases**: Handles multi-line changes, deletions, additions

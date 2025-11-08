@@ -7,5 +7,3 @@ COPY services/agentflow/package.json services/agentflow/yarn.lock ./
 RUN yarn install --frozen-lockfile
 
 COPY services/agentflow/. .
-
-EXPOSE 50052

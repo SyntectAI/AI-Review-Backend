@@ -2,8 +2,9 @@
   Copyright (c) 2025 SyntectAI
   Licensed under the CC BY-NC-SA 4.0 International License.
 */
+
+import { randomUUID } from 'node:crypto';
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
-import { randomUUID } from 'crypto';
 import { type Request } from 'express';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -23,13 +24,13 @@ export class AppLoggingInterceptor implements NestInterceptor {
     request.headers['x-trace-id'] = traceId;
 
     const logData = {
+      body: sanitizedBody,
+      ip: request.ip || request.connection.remoteAddress,
       message: `INCOMING REQUEST`,
-      traceId,
       method: request.method,
+      traceId,
       url: request.originalUrl,
       userAgent: request.headers['user-agent'] || '',
-      ip: request.ip || request.connection.remoteAddress,
-      body: sanitizedBody,
     };
 
     this.logger.log(logData);
@@ -39,9 +40,9 @@ export class AppLoggingInterceptor implements NestInterceptor {
         finalize: () => {
           const duration = Date.now() - startTime;
           const responseLogData = {
+            elapsed: `${duration}ms`,
             message: 'PERFORMANCE',
             traceId,
-            elapsed: `${duration}ms`,
           };
 
           this.logger.log(responseLogData);

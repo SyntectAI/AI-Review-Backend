@@ -11,13 +11,13 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
 
 @Module({
-  imports: [AuthClientModule, PassportModule],
   controllers: [AuthController],
+  imports: [AuthClientModule, PassportModule],
   providers: [
     {
+      inject: [ConfigService],
       provide: JwtStrategy,
       useFactory: (configService: ConfigService) => new JwtStrategy(configService),
-      inject: [ConfigService],
     },
   ],
 })

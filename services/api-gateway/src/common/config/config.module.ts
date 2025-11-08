@@ -10,8 +10,8 @@ import { validateEnv } from './env.validation';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true,
       cache: true,
+      isGlobal: true,
       validate: validateEnv,
     }),
   ],
