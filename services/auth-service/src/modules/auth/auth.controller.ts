@@ -12,11 +12,6 @@ import type { AuthDto } from './dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @GrpcMethod('AuthService', 'SignUp')
-  signUp(dto: AuthDto): Promise<{ accessToken: string }> {
-    return this.authService.signUp(dto);
-  }
-
   @GrpcMethod('AuthService', 'SignIn')
   signIn(dto: AuthDto): Promise<{ accessToken: string }> {
     return this.authService.signIn(dto);

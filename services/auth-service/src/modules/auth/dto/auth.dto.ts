@@ -3,6 +3,6 @@
   Licensed under the CC BY-NC-SA 4.0 International License.
 */
 export interface AuthDto {
-  email: string;
+  login: string;
   password: string;
 }

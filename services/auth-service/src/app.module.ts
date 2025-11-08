@@ -7,7 +7,7 @@ import { Module } from '@nestjs/common';
 import { AppConfigModule } from './common/config/config.module';
 import { AppLogger } from './common/logger/app-logger';
 import { AuthModule } from './modules/auth/auth.module';
-import { PrismaModule } from './modules/prisma/prisma.module';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
   imports: [AppConfigModule, AuthModule, PrismaModule],

@@ -7,7 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { PrismaModule } from 'src/modules/prisma/prisma.module';
+import { PrismaModule } from 'prisma/prisma.module';
 
 import { GrpcLoggingInterceptor } from '../../common/interceptors/grpc-logging.interceptor';
 import { AuthController } from './auth.controller';
