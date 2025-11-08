@@ -4,7 +4,6 @@ CREATE TYPE "Role" AS ENUM ('ADMIN', 'USER');
 -- CreateTable
 CREATE TABLE "User" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
-    "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "login" TEXT NOT NULL,
     "role" "Role" NOT NULL DEFAULT 'USER',
@@ -13,9 +12,6 @@ CREATE TABLE "User" (
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
-
--- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_login_key" ON "User"("login");

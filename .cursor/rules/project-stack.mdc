@@ -88,7 +88,7 @@ Client (HTTP) → API Gateway → gRPC → Microservices → PostgreSQL
 
 **Database Schema** (`User` model):
 - `id`: UUID (auto-generated)
-- `email`: String (unique)
+- `login`: String (unique)
 - `password`: String (bcrypt hashed)
 - `role`: Enum (ADMIN, USER)
 - `createdAt`, `updatedAt`: DateTime
@@ -97,9 +97,9 @@ Client (HTTP) → API Gateway → gRPC → Microservices → PostgreSQL
 - `SignUp(AuthRequest) → AuthResponse`: Creates user, returns JWT
 - `SignIn(AuthRequest) → AuthResponse`: Validates credentials, returns JWT
 
-**Business Logic**: Password hashing (bcrypt), email uniqueness validation, credential verification, JWT token generation with claims (email, sub, role)
+**Business Logic**: Password hashing (bcrypt), login uniqueness validation, credential verification, JWT token generation with claims (login, sub, role)
 
-**Error Handling**: `ALREADY_EXISTS` (email duplicate), `UNAUTHENTICATED` (invalid credentials)
+**Error Handling**: `ALREADY_EXISTS` (login duplicate), `UNAUTHENTICATED` (invalid credentials)
 
 ### 3. AgentFlow Service
 **Port**: 50052 (gRPC)
@@ -147,7 +147,7 @@ Client (HTTP) → API Gateway → gRPC → Microservices → PostgreSQL
 
 ### Security
 - **Password Security**: bcrypt hashing with salt rounds (passwords never stored in plain text)
-- **Token-Based Auth**: JWT tokens with user claims (ID, email, role)
+- **Token-Based Auth**: JWT tokens with user claims (ID, login, role)
 - **Webhook Verification**: HMAC-SHA256 signature validation
 - **CORS Protection**: Configurable origin and header restrictions
 - **gRPC Encryption**: Built-in TLS support (configurable)

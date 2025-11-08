@@ -3,15 +3,16 @@
   Licensed under the CC BY-NC-SA 4.0 International License.
 */
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsString, MinLength } from 'class-validator';
 
 export class AuthDto {
   @ApiProperty({
-    description: 'User email address',
-    example: 'user@example.com',
+    description: 'User login',
+    example: 'user',
   })
-  @IsEmail({}, { message: 'User must provide valid email' })
-  email: string;
+  @IsString()
+  @MinLength(5, { message: 'login must be longer than or equal to 5 characters' })
+  login: string;
 
   @ApiProperty({
     description: 'User password (minimum 8 characters)',
@@ -19,6 +20,6 @@ export class AuthDto {
     minLength: 8,
   })
   @IsString()
-  @MinLength(8, { message: 'password must be longer than or equal to 8 characters' })
+  @MinLength(5, { message: 'password must be longer than or equal to 5 characters' })
   password: string;
 }

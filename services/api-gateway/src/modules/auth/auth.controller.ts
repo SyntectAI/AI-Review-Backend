@@ -23,12 +23,6 @@ export class AuthController implements OnModuleInit {
     this.authService = this.client.getService<AuthService>('AuthService');
   }
 
-  @Post('signup')
-  @AuthSwagger.signUp()
-  signUp(@Body() authDto: AuthDto, @CustomRpcMetadata() metadata: Metadata) {
-    return this.authService.signUp(authDto, metadata);
-  }
-
   @Post('signin')
   @AuthSwagger.signIn()
   signIn(@Body() authDto: AuthDto, @CustomRpcMetadata() metadata: Metadata) {

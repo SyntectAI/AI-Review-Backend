@@ -12,10 +12,10 @@ export class SimpleUserResponseDto {
   id: string;
 
   @ApiProperty({
-    description: 'User email address',
-    example: 'user@example.com',
+    description: 'User login',
+    example: 'user',
   })
-  email: string;
+  login: string;
 
   @ApiProperty({
     description: 'User role',

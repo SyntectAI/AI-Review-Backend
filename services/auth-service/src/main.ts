@@ -15,7 +15,7 @@ async function bootstrap() {
     logger: new AppLogger('AuthMicroservice'),
     options: {
       package: 'auth',
-      protoPath: join(__dirname, '../../../proto/auth.proto'),
+      protoPath: join('/app', 'proto', 'auth.proto'),
       url: '0.0.0.0:50051',
     },
     transport: Transport.GRPC,

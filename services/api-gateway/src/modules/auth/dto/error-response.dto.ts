@@ -7,7 +7,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class ErrorResponseDto {
   @ApiProperty({
     description: 'Error message describing what went wrong',
-    example: 'User with this email already exists',
+    example: 'User with this login already exists',
   })
   message: string;
 
@@ -20,7 +20,7 @@ export class ErrorResponseDto {
 
   @ApiProperty({
     description: 'Additional error details',
-    example: { field: 'email', value: 'user@example.com' },
+    example: { field: 'login', value: 'user@example.com' },
     required: false,
   })
   details?: unknown;
@@ -30,10 +30,6 @@ export class ValidationErrorDto extends ErrorResponseDto {
   @ApiProperty({
     description: 'Array of validation errors',
     example: [
-      {
-        field: 'email',
-        message: 'Email must be a valid email address',
-      },
       {
         field: 'password',
         message: 'Password must be at least 8 characters long',

@@ -17,7 +17,6 @@ interface LogData {
   userAgent?: string;
   ip?: string;
   userId?: string;
-  email?: string;
   error?: string;
   success?: boolean;
   [key: string]: unknown;
@@ -55,7 +54,6 @@ export class AppLogger extends ConsoleLogger {
       if (data.userAgent) logEntry.userAgent = data.userAgent as string;
       if (data.ip) logEntry.ip = data.ip as string;
       if (data.userId) logEntry.userId = data.userId as string;
-      if (data.email) logEntry.email = data.email as string;
       if (data.error) logEntry.error = data.error as string;
       if (data.success !== undefined) logEntry.success = data.success as boolean;
 

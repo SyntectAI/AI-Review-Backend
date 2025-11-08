@@ -4,7 +4,6 @@
 */
 export interface User {
   createdAt: Date;
-  email: string;
   id: string;
   password: string;
   role: Role;

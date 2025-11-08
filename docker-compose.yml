@@ -18,7 +18,7 @@ services:
     env_file:
       - ./.env
     ports:
-      - '5432:5432'
+      - "5432:5432"
     restart: unless-stopped
     volumes:
       - db-data:/var/lib/postgresql/data
@@ -57,7 +57,7 @@ services:
       - /app/services/auth-service/node_modules
     depends_on:
       - postgres
-    command: sh -c "npx prisma migrate dev --name init && npx prisma db seed && npm run start:dev"
+    command: sh -c "npx prisma generate && npx prisma migrate dev --name init && npx prisma db seed && npm run start:dev"
 
   agentflow-service:
     container_name: agentflow-service

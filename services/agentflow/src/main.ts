@@ -15,7 +15,7 @@ async function bootstrap() {
     logger: new AppLogger('AgentFlowMicroservice'),
     options: {
       package: 'agentflow',
-      protoPath: join(__dirname, '../../../proto/agentflow.proto'),
+      protoPath: join('/app', 'proto', 'agentflow.proto'),
       url: '0.0.0.0:50052',
     },
     transport: Transport.GRPC,

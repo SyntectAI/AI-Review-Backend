@@ -18,7 +18,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         useFactory: (configService: ConfigService) => ({
           options: {
             package: 'agentflow',
-            protoPath: join(__dirname, '../../../../../proto/agentflow.proto'),
+            protoPath: join('/app', 'proto', 'agentflow.proto'),
             url: configService.get<string>('AGENTFLOW_SERVICE_URL'),
           },
           transport: Transport.GRPC,
