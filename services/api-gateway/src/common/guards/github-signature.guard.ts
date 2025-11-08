@@ -2,9 +2,10 @@
   Copyright (c) 2025 SyntectAI
   Licensed under the CC BY-NC-SA 4.0 International License.
 */
+
+import * as crypto from 'node:crypto';
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as crypto from 'crypto';
 import { Request } from 'express';
 
 @Injectable()
@@ -26,7 +27,7 @@ export class GithubSignatureGuard implements CanActivate {
     }
 
     const hmac = crypto.createHmac('sha256', secret);
-    const digest = 'sha256=' + hmac.update(request.rawBody).digest('hex');
+    const digest = `sha256=${hmac.update(request.rawBody).digest('hex')}`;
 
     if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest))) {
       throw new UnauthorizedException('Invalid signature');

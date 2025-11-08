@@ -7,5 +7,3 @@ COPY services/agentflow/package.json ./
 RUN npm install
 
 COPY services/agentflow/. .
-
-EXPOSE 50052

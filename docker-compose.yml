@@ -30,7 +30,6 @@ services:
       dockerfile: ./services/api-gateway/Dockerfile
     ports:
       - 3000:3000
-      - 9229:9229
     env_file:
       - ./services/api-gateway/.env
     restart: unless-stopped
@@ -48,7 +47,6 @@ services:
       context: .
       dockerfile: ./services/auth-service/Dockerfile
     ports:
-      - 3001:3001
       - 50051:50051
     env_file:
       - ./services/auth-service/.env

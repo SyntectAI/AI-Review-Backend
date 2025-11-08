@@ -15,22 +15,23 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 
 @Module({
+  controllers: [AuthController],
+  exports: [AuthService, JwtModule],
   imports: [
     PrismaModule,
     ConfigModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
+      inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET_KEY') || '',
         signOptions: {
           expiresIn: configService.get('JWT_ACCESS_TOKEN_EXPIRES_IN', '15m'),
         },
       }),
-      inject: [ConfigService],
     }),
   ],
-  controllers: [AuthController],
   providers: [
     AuthService,
     JwtStrategy,
@@ -39,6 +40,5 @@ import { JwtStrategy } from './jwt.strategy';
       useClass: GrpcLoggingInterceptor,
     },
   ],
-  exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

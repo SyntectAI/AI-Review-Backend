@@ -3,3 +3,4 @@
   Licensed under the CC BY-NC-SA 4.0 International License.
 */
 export * from './code-review-request.dto';
+export * from './code-review-success-response.dto';

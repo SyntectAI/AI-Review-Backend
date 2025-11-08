@@ -24,7 +24,7 @@ async function bootstrap() {
   const corsExposedHeaders = configService.get<string>('CORS_EXPOSED_HEADERS');
   const corsMethods = (configService.get<string>('CORS_METHODS') ?? '').split(', ');
   const corsOrigins = (configService.get<string>('CORS_ORIGINS') ?? '').split(', ');
-  const isDev = !process.env['NODE_ENV'];
+  const isDev = !process.env.NODE_ENV;
 
   if (!isDev) {
     app.enableCors({
@@ -33,7 +33,7 @@ async function bootstrap() {
       exposedHeaders: corsExposedHeaders,
       methods: corsMethods,
       origin: (origin: string, callback: (err: Error | null, allow?: boolean) => void) => {
-        if (!origin || !corsOrigins.includes(origin)) {
+        if (!(origin && corsOrigins.includes(origin))) {
           callback(new ForbiddenException('Not allowed by CORS'), false);
           return;
         }

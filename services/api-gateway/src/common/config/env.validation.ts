@@ -5,6 +5,8 @@
 import { z } from 'zod';
 
 const envSchema = z.object({
+  AGENTFLOW_SERVICE_URL: z.string().default('agentflow-service:50052'),
+  AUTH_SERVICE_URL: z.string().default('auth-service:50051'),
   CORS_ALLOWED_HEADERS: z.string().default('Content-Type, Authorization, Origin'),
   CORS_CREDENTIALS: z
     .string()
@@ -13,12 +15,10 @@ const envSchema = z.object({
   CORS_EXPOSED_HEADERS: z.string().default(''),
   CORS_METHODS: z.string().default('GET, POST, DELETE, PATCH'),
   CORS_ORIGINS: z.string().default('http://localhost:3001, http://localhost:4200'),
+  GITHUB_TOKEN: z.string().min(1, 'GitHub token is required'),
   GITHUB_WEBHOOK_SECRET: z.string().min(1, 'GitHub webhook secret is required'),
   JWT_ACCESS_TOKEN_EXPIRES_IN: z.string().default('10d'),
   JWT_SECRET_KEY: z.string().min(1, 'JWT secret key is required'),
-  AUTH_SERVICE_URL: z.string().default('auth-service:50051'),
-  AGENTFLOW_SERVICE_URL: z.string().default('agentflow-service:50052'),
-  GITHUB_TOKEN: z.string().min(1, 'GitHub token is required'),
 });
 
 export type Env = z.infer<typeof envSchema>;

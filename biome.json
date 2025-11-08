@@ -24,6 +24,9 @@
       "quoteStyle": "single",
       "semicolons": "always",
       "trailingCommas": "all"
+    },
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
     }
   },
   "linter": {
@@ -57,8 +60,8 @@
       },
       "recommended": true,
       "style": {
-        "noEnum": "error",
-        "noMagicNumbers": "error",
+        "noEnum": "off",
+        "noMagicNumbers": "off",
         "noNegationElse": "error",
         "noNestedTernary": "error",
         "noParameterAssign": "error",
@@ -87,7 +90,7 @@
       "suspicious": {
         "noConsole": "warn",
         "noConstantBinaryExpressions": "error",
-        "noEmptyBlockStatements": "error",
+        "noEmptyBlockStatements": "off",
         "noEvolvingTypes": "error",
         "noUnassignedVariables": "error",
         "useBiomeIgnoreFolder": "off",
@@ -98,6 +101,18 @@
   "overrides": [
     {
       "includes": ["services/agentflow/**/*.spec.ts", "services/agentflow/test/**/*.ts"],
+      "linter": {
+        "rules": {}
+      }
+    },
+    {
+      "includes": ["services/api-gateway/**/*.spec.ts", "services/api-gateway/test/**/*.ts"],
+      "linter": {
+        "rules": {}
+      }
+    },
+    {
+      "includes": ["services/auth-service/**/*.spec.ts", "services/auth-service/test/**/*.ts"],
       "linter": {
         "rules": {}
       }

@@ -13,16 +13,16 @@ export class AuthResponseDto {
   accessToken: string;
 
   @ApiProperty({
+    default: 'Bearer',
     description: 'Token type',
     example: 'Bearer',
-    default: 'Bearer',
   })
   tokenType: string;
 
   @ApiProperty({
+    default: 864000,
     description: 'Token expiration time in seconds',
     example: 864000,
-    default: 864000,
   })
   expiresIn: number;
 }

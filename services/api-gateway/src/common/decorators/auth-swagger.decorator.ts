@@ -9,11 +9,11 @@ import { AuthDto, SimpleAuthResponseDto, SimpleErrorResponseDto } from '../../mo
 
 const AuthExamples = {
   body: {
-    valid: {
-      summary: 'Valid request',
+    invalidCredentials: {
+      summary: 'Invalid credentials',
       value: {
         email: 'john.doe@example.com',
-        password: 'SecurePass123!',
+        password: 'wrongpassword',
       },
     },
     invalidEmail: {
@@ -30,11 +30,72 @@ const AuthExamples = {
         password: '123',
       },
     },
-    invalidCredentials: {
-      summary: 'Invalid credentials',
+    valid: {
+      summary: 'Valid request',
       value: {
         email: 'john.doe@example.com',
-        password: 'wrongpassword',
+        password: 'SecurePass123!',
+      },
+    },
+  },
+  responses: {
+    existingUser: {
+      summary: 'User with email already exists',
+      value: {
+        message: 'User with this email already exists',
+        statusCode: 409,
+        timestamp: '2025-01-19T12:55:33.000Z',
+      },
+    },
+    invalidCredentials: {
+      summary: 'Invalid email or password',
+      value: {
+        message: 'Invalid credentials',
+        statusCode: 401,
+        timestamp: '2025-01-19T12:56:22.000Z',
+      },
+    },
+    invalidToken: {
+      summary: 'Invalid token',
+      value: {
+        message: 'Invalid token',
+        statusCode: 401,
+        timestamp: '2025-01-19T12:56:47.000Z',
+      },
+    },
+    success: {
+      summary: 'Successful operation',
+      value: {
+        accessToken:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwic3ViIjoiMTIzNDU2NzgtOTBhYi1jZGVmLTEyMzQtNTY3ODkwYWJjZGVmIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE2Mzk1NjgwMDAsImV4cCI6MTYzOTY1NDQwMH0.signature',
+      },
+    },
+    userResponse: {
+      summary: 'Valid token response',
+      value: {
+        createdAt: '2025-01-19T12:54:39.000Z',
+        email: 'john.doe@example.com',
+        id: '12345678-90ab-cdef-1234-567890abcdef',
+        role: 'USER',
+        updatedAt: '2025-01-19T12:54:39.000Z',
+      },
+    },
+    validationErrors: {
+      invalidEmail: {
+        summary: 'Invalid email format',
+        value: {
+          message: 'Email must be a valid email address',
+          statusCode: 400,
+          timestamp: '2025-01-19T12:55:33.000Z',
+        },
+      },
+      shortPassword: {
+        summary: 'Password too short',
+        value: {
+          message: 'Password must be at least 8 characters long',
+          statusCode: 400,
+          timestamp: '2025-01-19T12:55:33.000Z',
+        },
       },
     },
   },
@@ -47,107 +108,9 @@ const AuthExamples = {
       },
     },
   },
-  responses: {
-    success: {
-      summary: 'Successful operation',
-      value: {
-        accessToken:
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwic3ViIjoiMTIzNDU2NzgtOTBhYi1jZGVmLTEyMzQtNTY3ODkwYWJjZGVmIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE2Mzk1NjgwMDAsImV4cCI6MTYzOTY1NDQwMH0.signature',
-      },
-    },
-    userResponse: {
-      summary: 'Valid token response',
-      value: {
-        id: '12345678-90ab-cdef-1234-567890abcdef',
-        email: 'john.doe@example.com',
-        role: 'USER',
-        createdAt: '2025-01-19T12:54:39.000Z',
-        updatedAt: '2025-01-19T12:54:39.000Z',
-      },
-    },
-    validationErrors: {
-      invalidEmail: {
-        summary: 'Invalid email format',
-        value: {
-          statusCode: 400,
-          message: 'Email must be a valid email address',
-          timestamp: '2025-01-19T12:55:33.000Z',
-        },
-      },
-      shortPassword: {
-        summary: 'Password too short',
-        value: {
-          statusCode: 400,
-          message: 'Password must be at least 8 characters long',
-          timestamp: '2025-01-19T12:55:33.000Z',
-        },
-      },
-    },
-    invalidCredentials: {
-      summary: 'Invalid email or password',
-      value: {
-        statusCode: 401,
-        message: 'Invalid credentials',
-        timestamp: '2025-01-19T12:56:22.000Z',
-      },
-    },
-    existingUser: {
-      summary: 'User with email already exists',
-      value: {
-        statusCode: 409,
-        message: 'User with this email already exists',
-        timestamp: '2025-01-19T12:55:33.000Z',
-      },
-    },
-    invalidToken: {
-      summary: 'Invalid token',
-      value: {
-        statusCode: 401,
-        message: 'Invalid token',
-        timestamp: '2025-01-19T12:56:47.000Z',
-      },
-    },
-  },
 };
 
 export const AuthSwagger = {
-  signUp: () => {
-    const decorators = [
-      ApiOperation({
-        description:
-          'Create a new user account with email and password. Returns a JWT access token upon successful registration.',
-      }),
-      ApiBody({
-        description: 'User registration details',
-        type: AuthDto,
-        examples: {
-          valid: AuthExamples.body.valid,
-          invalidEmail: AuthExamples.body.invalidEmail,
-          shortPassword: AuthExamples.body.shortPassword,
-        },
-      }),
-      ApiResponse({
-        status: 201,
-        description: 'User successfully created and authenticated',
-        type: SimpleAuthResponseDto,
-        examples: { success: AuthExamples.responses.success },
-      }),
-      ApiResponse({
-        status: 400,
-        description: 'Validation error - Invalid input data',
-        type: SimpleErrorResponseDto,
-        examples: AuthExamples.responses.validationErrors,
-      }),
-      ApiResponse({
-        status: 409,
-        description: 'Conflict - User already exists',
-        type: SimpleErrorResponseDto,
-        examples: { existingUser: AuthExamples.responses.existingUser },
-      }),
-    ];
-    return applyDecorators(...decorators);
-  },
-
   signIn: () => {
     const decorators = [
       ApiOperation({
@@ -156,31 +119,67 @@ export const AuthSwagger = {
       }),
       ApiBody({
         description: 'User login credentials',
-        type: AuthDto,
         examples: {
-          validCredentials: AuthExamples.body.valid,
           invalidCredentials: AuthExamples.body.invalidCredentials,
+          validCredentials: AuthExamples.body.valid,
         },
+        type: AuthDto,
       }),
       ApiResponse({
-        status: 200,
         description: 'User successfully authenticated',
-        type: SimpleAuthResponseDto,
         examples: { success: AuthExamples.responses.success },
+        status: 200,
+        type: SimpleAuthResponseDto,
       }),
       ApiResponse({
-        status: 400,
         description: 'Validation error - Invalid input data',
-        type: SimpleErrorResponseDto,
         examples: {
           invalidEmail: AuthExamples.responses.validationErrors.invalidEmail,
         },
+        status: 400,
+        type: SimpleErrorResponseDto,
       }),
       ApiResponse({
-        status: 401,
         description: 'Authentication error - Invalid credentials',
-        type: SimpleErrorResponseDto,
         examples: { invalidCredentials: AuthExamples.responses.invalidCredentials },
+        status: 401,
+        type: SimpleErrorResponseDto,
+      }),
+    ];
+    return applyDecorators(...decorators);
+  },
+  signUp: () => {
+    const decorators = [
+      ApiOperation({
+        description:
+          'Create a new user account with email and password. Returns a JWT access token upon successful registration.',
+      }),
+      ApiBody({
+        description: 'User registration details',
+        examples: {
+          invalidEmail: AuthExamples.body.invalidEmail,
+          shortPassword: AuthExamples.body.shortPassword,
+          valid: AuthExamples.body.valid,
+        },
+        type: AuthDto,
+      }),
+      ApiResponse({
+        description: 'User successfully created and authenticated',
+        examples: { success: AuthExamples.responses.success },
+        status: 201,
+        type: SimpleAuthResponseDto,
+      }),
+      ApiResponse({
+        description: 'Validation error - Invalid input data',
+        examples: AuthExamples.responses.validationErrors,
+        status: 400,
+        type: SimpleErrorResponseDto,
+      }),
+      ApiResponse({
+        description: 'Conflict - User already exists',
+        examples: { existingUser: AuthExamples.responses.existingUser },
+        status: 409,
+        type: SimpleErrorResponseDto,
       }),
     ];
     return applyDecorators(...decorators);

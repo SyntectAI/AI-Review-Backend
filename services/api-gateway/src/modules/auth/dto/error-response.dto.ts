@@ -23,7 +23,7 @@ export class ErrorResponseDto {
     example: { field: 'email', value: 'user@example.com' },
     required: false,
   })
-  details?: any;
+  details?: unknown;
 }
 
 export class ValidationErrorDto extends ErrorResponseDto {

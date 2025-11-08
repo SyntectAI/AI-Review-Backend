@@ -2,6 +2,12 @@ import { z } from 'zod';
 
 import { ChangedLine, changedFileSchema } from '../schemas';
 
+const extractLineNumberFromHeader = (headerLine: string): number | null => {
+  const match = headerLine.match(/\+(\d+)/);
+
+  return match ? Number.parseInt(match[1], 10) : null;
+};
+
 export const parsePatch = (patch: string | null) => {
   if (!patch) {
     return [];
@@ -12,10 +18,10 @@ export const parsePatch = (patch: string | null) => {
 
   for (const line of patch.split('\n')) {
     if (line.startsWith('@@')) {
-      const match = line.match(/\+(\d+)/);
+      const extractedLineNumber = extractLineNumberFromHeader(line);
 
-      if (match) {
-        currentLineNumber = Number.parseInt(match[1], 10);
+      if (extractedLineNumber !== null) {
+        currentLineNumber = extractedLineNumber;
       }
 
       continue;
@@ -24,7 +30,7 @@ export const parsePatch = (patch: string | null) => {
     if (line.startsWith('+')) {
       result.push({
         content: line.substring(1),
-        isAdded: line.startsWith('+'),
+        isAdded: true,
         lineNumber: currentLineNumber,
       });
     }
@@ -47,10 +53,10 @@ export const getPositionFromLine = (patch: string, lineNumber: number) => {
 
   for (const line of patch.split('\n')) {
     if (line.startsWith('@@')) {
-      const match = line.match(/\+(\d+)/);
+      const extractedLineNumber = extractLineNumberFromHeader(line);
 
-      if (match) {
-        currentLine = Number.parseInt(match[1], 10);
+      if (extractedLineNumber !== null) {
+        currentLine = extractedLineNumber;
       }
     } else if (!line.startsWith('-')) {
       if (currentLine === lineNumber) {

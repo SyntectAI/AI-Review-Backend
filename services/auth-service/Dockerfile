@@ -11,5 +11,3 @@ COPY services/auth-service/prisma ./prisma
 RUN npx prisma generate
 
 COPY services/auth-service/. .
-
-EXPOSE 3001

@@ -30,6 +30,9 @@ class CodeReviewRepositoryDto {
 }
 
 export class CodeReviewRequestDto {
+  @IsString()
+  action: 'opened' | 'reopened' | 'closed';
+
   @ValidateNested()
   @Type(() => CodeReviewPullRequestDto)
   pull_request: CodeReviewPullRequestDto;

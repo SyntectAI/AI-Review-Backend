@@ -10,18 +10,18 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   private readonly logger = new Logger(JwtStrategy.name);
-  constructor(private readonly configService: ConfigService) {
+  constructor(readonly configService: ConfigService) {
     const secretOrKey = configService.get<string>('JWT_SECRET_KEY', '');
 
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey,
     });
   }
 
   validate(payload: { sub: number; email: string; role: string }) {
     this.logger.log('Validating user:', { payload });
-    return { id: payload.sub, email: payload.email, role: payload.role };
+    return { email: payload.email, id: payload.sub, role: payload.role };
   }
 }
