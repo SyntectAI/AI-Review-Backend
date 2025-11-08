@@ -40,7 +40,7 @@ services:
       - /app/services/api-gateway/node_modules
     depends_on:
       - auth-service
-    command: sh -c "yarn start:dev"
+    command: sh -c "npm run start:dev"
 
   auth-service:
     container_name: auth-service
@@ -59,7 +59,7 @@ services:
       - /app/services/auth-service/node_modules
     depends_on:
       - postgres
-    command: sh -c "yarn prisma migrate deploy && yarn start:dev"
+    command: sh -c "npx prisma migrate dev --name init && npx prisma db seed && npm run start:dev"
 
   agentflow-service:
     container_name: agentflow-service
@@ -75,7 +75,7 @@ services:
       - ./services/agentflow:/app/services/agentflow
       - ./proto:/app/proto
       - /app/services/agentflow/node_modules
-    command: sh -c "yarn start:dev"
+    command: sh -c "npm run start:dev"
 
 volumes:
   db-data:
